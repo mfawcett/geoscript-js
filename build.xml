@@ -4,6 +4,8 @@
     <property name="project" value="geoscript-js"/>
     <property name="home" value="."/>
     <property name="build" value="${home}/build"/>
+    <property name="ringo" location="externals/ringojs"/>
+    <property name="jsdoc" location="externals/jsdoc"/>
     <property name="test.only" value="${home}/tests/all.js"/>
     <condition property="git" value="git.cmd" else="git">
         <os family="windows"/>
@@ -36,11 +38,28 @@
     </target>
 
     <target name="test">
-        <java jar="externals/ringojs/run.jar" fork="true" failonerror="yes">
-            <sysproperty key="ringo.home" path="externals/ringojs"/>
+        <java jar="${ringo}/run.jar" fork="true" failonerror="yes">
+            <sysproperty key="ringo.home" path="${ringo}"/>
             <sysproperty key="ringo.classpath" value="lib/**,../../jars/**"/>
             <sysproperty key="ringo.modulepath" path="lib"/>
             <arg path="${test.only}"/>
+        </java>
+    </target>
+
+    <target name="doc">
+        <delete dir="${basedir}/out"/>
+        <echo message="Parsing modules for docs ..."/>
+        <java jar="${jsdoc}/lib/js.jar" fork="true" failonerror="yes">
+            <arg value="-modules"/>
+            <arg path="${jsdoc}/node_modules"/>
+            <arg value="-modules"/>
+            <arg path="${jsdoc}/rhino_modules"/>
+            <arg value="-modules"/>
+            <arg path="${jsdoc}"/>
+            <arg path="${jsdoc}/jsdoc.js"/>
+            <arg line="--dirname=${jsdoc}"/>
+            <arg value="--recurse"/>
+            <arg path="${basedir}/lib"/>
         </java>
     </target>
     

@@ -1,3 +1,6 @@
 [submodule "externals/ringojs"]
 	path = externals/ringojs
 	url = https://github.com/ringo/ringojs.git
+[submodule "externals/jsdoc"]
+	path = externals/jsdoc
+	url = git://github.com/micmath/jsdoc.git
