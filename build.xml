@@ -15,7 +15,9 @@
         <echo message=""/>
         <echo message="GeoScriptJS build targets"/>
         <echo message=""/>
+        <echo message=" init       --> pull down dependencies"/>
         <echo message=" test       --> runs tests"/>
+        <echo message=" doc        --> build docs"/>
         <echo message=" clean      --> clean up compiled resources"/>
     </target>
 
