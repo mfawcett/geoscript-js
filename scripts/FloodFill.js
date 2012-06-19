@@ -76,14 +76,19 @@ function comparePlannerNode(n1, n2) {
 	return 0;
 }
 
+print ("---- chk: setting up planner");
 var openQueue = new BUCKETS.PriorityQueue(comparePlannerNode);
 var allMap = new BUCKETS.Dictionary();
+var allCoordLinkedList = new BUCKETS.LinkedList();
 
 var startNode = new PlannerNode(null, 10, 10, 0);
 openQueue.add(startNode);
 allMap.set(startNode.getHash(), startNode);
+allCoordLinkedList.add([startNode.x, startNode.y]);
 
 var gMax = 3;
+print ("---- chk: starting planner");
+
 
 while (!openQueue.isEmpty()) {
 	
@@ -125,7 +130,13 @@ while (!openQueue.isEmpty()) {
 				
 				// only if this spot has not been visited in the past
 				if (existingNode == undefined) {
-					var cg = node.g + 1;
+					var cg = null;
+					
+					if (cx == node.x || cy == node.y) {
+						cg = node.g + 1;
+					} else {
+						cg = node.cg + 1.41421356;
+					}
 					
 					// do not push nodes that are beyond reachability cut-off
 					if(cg <= gMax) {
@@ -136,6 +147,8 @@ while (!openQueue.isEmpty()) {
 							openQueue.add(child);
 							// added to allMap so we do not regenerate this node again 
 							allMap.set(hash, child);
+							// save all the geometries
+							allCoordLinkedList.add(new Array(cx, cy));
 						}
 							
 					}
@@ -146,22 +159,34 @@ while (!openQueue.isEmpty()) {
 		}
 	}	
 }
+print ("---- chk: finished planning");
+var pointsArray = allCoordLinkedList.toArray();
+print("pointsArray.length: ", pointsArray.length);
+var points = new GEOM.MultiPoint(pointsArray);
+
+
 
 
 print("==========================");
-print(" - [Number] Point.area: " + poly.Area); //The geometry area.
-print(" - [geom.bounds] Point.bounds: " + poly.bounds); //The bounds defined by minimum and maximum x and y values in this geometry.
-print(" - [geom.Point] Point.centroid: " + poly.centroid); //The centroid of this geometry.
-print(" - [Array] Point.coordinates: " + poly.coordinates); //The geometry’s coordinates array.
-print(" - [Number] Point.dimension: " + poly.dimension); //The dimension of this geometry.
-print(" - [Boolean] Point.empty: " + poly.empty); //The geometry is empty.
-print(" - [String] Point.json: " + poly.json); //The JSON representation of the geometry (see http://geojson.org).
-print(" - [Number] Point.length: " + poly.length); //The geometry length.
-print(" - [Boolean] Point.prepared: " + poly.prepared); //This is a prepared geometry.
-print(" - [proj.Projection] Point.projection: " + poly.projection); //Optional projection for the geometry. If this is set, it is assumed that the geometry coordinates are in the corresponding coordinate reference system. Use the transform() method to transform a geometry from one coordinate reference system to another.
-print(" - [Boolean] Point.rectangle: " + poly.rectangle); //This geometry is a rectangle.
-print(" - [Boolean] Point.simple: " + poly.simple); //The geometry is simple.
-print(" - [Boolean] Point.valid: " + poly.valid); //The geometry is valid.
+//print(" - [geom.bounds] Point.bounds: " + points.bounds); //The bounds defined by minimum and maximum x and y values in this geometry.
+
+VIEWER.draw(points);
+//VIEWER.draw(points.boundary());
+VIEWER.draw(points.convexHull());
+
+//print(" - [Number] Point.area: " + points.Area); //The geometry area.
+//print(" - [geom.bounds] Point.bounds: " + points.bounds); //The bounds defined by minimum and maximum x and y values in this geometry.
+//print(" - [geom.Point] Point.centroid: " + poly.centroid); //The centroid of this geometry.
+//print(" - [Array] Point.coordinates: " + poly.coordinates); //The geometry’s coordinates array.
+//print(" - [Number] Point.dimension: " + poly.dimension); //The dimension of this geometry.
+//print(" - [Boolean] Point.empty: " + poly.empty); //The geometry is empty.
+//print(" - [String] Point.json: " + poly.json); //The JSON representation of the geometry (see http://geojson.org).
+//print(" - [Number] Point.length: " + poly.length); //The geometry length.
+//print(" - [Boolean] Point.prepared: " + poly.prepared); //This is a prepared geometry.
+//print(" - [proj.Projection] Point.projection: " + poly.projection); //Optional projection for the geometry. If this is set, it is assumed that the geometry coordinates are in the corresponding coordinate reference system. Use the transform() method to transform a geometry from one coordinate reference system to another.
+//print(" - [Boolean] Point.rectangle: " + poly.rectangle); //This geometry is a rectangle.
+//print(" - [Boolean] Point.simple: " + poly.simple); //The geometry is simple.
+//print(" - [Boolean] Point.valid: " + poly.valid); //The geometry is valid.
 //print(" - [Number] Point.x: " + Point.x); //The first coordinate value.
 //print(" - [Number] Point.y: " + Point.y); //The second coordinate value.
 //print(" - [Number] Point.z: " + Point.z); //The third coordinate value (or NaN if none).
@@ -176,4 +201,4 @@ print(" - [Boolean] Point.valid: " + poly.valid); //The geometry is valid.
 //var bufferOptions = {segs: 8, caps: GEOM.BUFFER_CAP_ROUND, single: false };
 //var PointBuffer = Point.buffer(bufferDistance, bufferOptions);
 
-VIEWER.draw(poly);
+//VIEWER.draw(poly);
