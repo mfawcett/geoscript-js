@@ -86,7 +86,7 @@ openQueue.add(startNode);
 allMap.set(startNode.getHash(), startNode);
 allCoordLinkedList.add([startNode.x, startNode.y]);
 
-var gMax = 3;
+var gMax = 9;
 print ("---- chk: starting planner");
 
 
@@ -95,9 +95,14 @@ while (!openQueue.isEmpty()) {
 	print("openQueue.length: " + openQueue.size());
 	print("allMap.length: " + allMap.size());
 	var node = openQueue.dequeue();
-	
+
+/*	
+	//NOTE: we should normally go until the open list is exhausted
+	//      and only push nodes with costs below the gMax onto open. 
+	//      Then all the points can be used to generate a conCAVE-hull. since 
+	//      concave hull is not implemented in geotools already (maybe on trunk?), generating the outside ring differently.
+	//      when we find a node in open that just crossed 
 	// check a potential solution's parents
-	/*
 	if (node.g >= gMax) {
 		print("node reached max reachability");
 		var n = node;
@@ -110,7 +115,7 @@ while (!openQueue.isEmpty()) {
 		
 		break;
 	}
-	*/
+*/	
 	
 	for (ii = 0; ii < 3; ii++) {
 		for (j = 0; j < 3; j++) {
@@ -126,22 +131,23 @@ while (!openQueue.isEmpty()) {
 				var hash = (cx << 16 | cy);
 				
 				var existingNode = allMap.get(hash);
-				print("-- child.x: ", cx, ", child.y: ", cy, ", hash: ", hash, ", new: ", (existingNode==undefined?true:false));
+//				print("-- child.x: ", cx, ", child.y: ", cy, ", hash: ", hash, ", new: ", (existingNode==undefined?true:false));
 				
 				// only if this spot has not been visited in the past
 				if (existingNode == undefined) {
 					var cg = null;
 					
-					if (cx == node.x || cy == node.y) {
+					if (cx === node.x || cy === node.y) {
 						cg = node.g + 1;
 					} else {
-						cg = node.cg + 1.41421356;
+						cg = node.g + 1.41421356;
 					}
-					
+					print("-- child.x: ", cx, ", child.y: ", cy, ", cg: " , cg, ", hash: ", hash, ", new: ", (existingNode==undefined?true:false));
+				
 					// do not push nodes that are beyond reachability cut-off
 					if(cg <= gMax) {
 						var point = new GEOM.Point([cx, cy]);
-						// only if the poly containes it
+						// only if the poly contains it
 						if (poly.contains(point)) {
 							var child =  new PlannerNode(node, cx, cy, cg);
 							openQueue.add(child);
@@ -158,6 +164,13 @@ while (!openQueue.isEmpty()) {
 			}
 		}
 	}	
+	
+//	var pointsArray = allCoordLinkedList.toArray();
+//	var points = new GEOM.MultiPoint(pointsArray);
+//	VIEWER.draw(points);
+//	alert("sometext");
+//	sleep(5000);
+//	prompt("sometext","defaultvalue");
 }
 print ("---- chk: finished planning");
 var pointsArray = allCoordLinkedList.toArray();
@@ -172,7 +185,11 @@ print("==========================");
 
 VIEWER.draw(points);
 //VIEWER.draw(points.boundary());
+
+//-- TODO: The real solution is a concaveHull
 VIEWER.draw(points.convexHull());
+
+
 
 //print(" - [Number] Point.area: " + points.Area); //The geometry area.
 //print(" - [geom.bounds] Point.bounds: " + points.bounds); //The bounds defined by minimum and maximum x and y values in this geometry.
